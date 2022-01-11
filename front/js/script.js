@@ -1,3 +1,6 @@
+//PENSEZ A SUPP LES CONSOLE.LOG!!!!!!!!!!!!!!!!!!
+
+
 //Appel de l'API des produits
 fetch('http://localhost:3000/api/products')
   .then((response) => response.json())
@@ -33,6 +36,7 @@ function makeAnchor(id) {
   return anchor;
 }
 
+//
 function appendArticleToAnchor(anchor, article) {
   const items = document.getElementById('items');
   items.appendChild(anchor);

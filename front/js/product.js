@@ -1,7 +1,10 @@
+//PENSEZ A SUPP LES CONSOLE.LOG!!!!!!!!!!!!!!!!!!
+
 //On récupere l'id du produit en question dans l'url
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 const id = urlParams.get('id');
+//?
 let article = '';
 
 const colorSelect = document.querySelector('#colors');
@@ -77,11 +80,11 @@ function onClick(article) {
         idProduit: id,
         color: selectColor,
         quantity: Number(selectQuantity),
-        nomProduit: article.name,
-        prixProduit: article.price,
-        descriptionProduit: article.description,
-        imgProduit: article.imageUrl,
-        altImgProduit: article.altTxt,
+        nom: article.name,
+        prix: article.price,
+        description: article.description,
+        imageUrl: article.imageUrl,
+        imgAlt: article.altTxt,
       };
 
       //init du localStorage
