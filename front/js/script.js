@@ -25,6 +25,7 @@ function appendElmtsArticle(article, image, h3, p) {
   article.appendChild(h3);
   article.appendChild(p);
 }
+
 // lien
 function makeAnchor(id) {
   const anchor = document.createElement('a');

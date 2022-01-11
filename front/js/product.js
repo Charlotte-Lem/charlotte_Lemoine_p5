@@ -10,8 +10,14 @@ const quantitySelect = document.querySelector('#quantity');
 //On récupère les produits de l'API
 
 fetch(`http://localhost:3000/api/products/${id}`)
-  .then((response) => response.json())
-  .then((res) => getArticle(res));
+  .then((response) => {
+    return response.json();
+  })
+  .then((res) => {
+    return getArticle(res);
+  })
+  .catch((error) => console.log(error));
+// .catch((error) => console.error(error)); ??????????
 
 //Création article des produits
 function getArticle(article) {
@@ -40,77 +46,99 @@ function getArticle(article) {
     elementsColor.value = colors;
     elementsColor.textContent = colors;
   }
+  // Appel de la function onClick
+  onClick(article);
+}
 
+function onClick(article) {
   //button d'ajout des produits et écouteurs d'événement au click
-
-  let button = document.querySelector('#addToCart');
-
+  const button = document.querySelector('#addToCart');
   button.addEventListener('click', (e) => {
     //Récupération des valeurs quantité et couleurs
     let selectColor = colorSelect.value;
     let selectQuantity = quantitySelect.value;
 
-    //Condition pour ajouter dans le panier couleur et quantité définit
-
-    if (selectQuantity == 0 || (selectQuantity > 100 && selectColor == '')) {
+    if (
+      selectQuantity == 0 ||
+      selectQuantity > 100 ||
+      selectColor == null ||
+      selectColor == ''
+    ) {
       alert(
-        //alert si l'utilisateur ne sélectionne pas de couleur ni de quantité
+        //alert si l'utilisateur ne sélectionne pas de couleur et|ou de quantité
         'Veuillez renseigner une quantité comprise entre 1 et 100 et une couleur'
       );
-    }
+      return;
+    } else {
+      //Condition pour ajouter dans le panier couleur et quantité définit
 
-    //Récupération des options de l'article à ajouter au panier
-    let produitStorage = {
-      idProduit: id,
-      couleurProduit: selectColor,
-      quantiteProduit: Number(selectQuantity),
-      nomProduit: article.name,
-      prixProduit: article.price,
-      descriptionProduit: article.description,
-      imgProduit: article.imageUrl,
-      altImgProduit: article.altTxt,
-    };
-    // console.log(produitStorage);
+      //Récupération des informations de l'article à ajouter au panier
+      let info = {
+        idProduit: id,
+        color: selectColor,
+        quantity: Number(selectQuantity),
+        nomProduit: article.name,
+        prixProduit: article.price,
+        descriptionProduit: article.description,
+        imgProduit: article.imageUrl,
+        altImgProduit: article.altTxt,
+      };
 
-    //---------------------------LOCAL STORAGE------------------------------
-    //--------------------------Stocker et récupérer des valeurs dans le local storage
+      //init du localStorage
 
-    //Déclaration de la variable "produitEnregistrerDansLeLocalStorage"
+      let purchaseStorage = JSON.parse(localStorage.getItem('produit'));
 
-    let purchaseStorage = JSON.parse(localStorage.getItem('produit'));
-    console.log(purchaseStorage);
+      //alerte que l'utilisateur aura quand il ajoutera un article dans le panier
 
-    //fenetre de confirmation
+      const alertConfirmation = () => {
+        if (
+          window.confirm(
+            `${selectQuantity} ${article.name} de couleur ${selectColor} a bien été ajouté à votre panier pour consulter votre panier appuyer sur OK sinon ANNULER pour rester sur la page`
+          )
+        ) {
+          //envoie l'utilisateur sur la page panier
+          window.location.href = 'cart.html';
+        }
+      };
 
-    const alertConfirmation = () => {
-      if (
-        window.confirm(`${article.name} de couleur ${selectColor} a bien été ajouté à votre panier
-       pour consulter votre panier appuyer sur OK sinon ANNULER pour revenir à l'accueil`)
-      ) {
-        //envoie l'utilisateur sur la page panier
-        window.location.href = 'cart.html';
+      if (purchaseStorage) {
+        const foundStorage = purchaseStorage.find(
+          (p) => p.idProduit === id && p.color === selectColor
+        );
+        if (foundStorage) {
+          //Si dans le panier il y a un produit avec le même id et la même couleur
+
+          // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!A REVOIR CAR PAS A L AISE ICI !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+          // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!A REVOIR CAR PAS A L AISE ICI !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+          // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!A REVOIR CAR PAS A L AISE ICI !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+          let totalQuantity =
+            parseInt(info.quantity) + parseInt(foundStorage.quantity);
+          foundStorage.quantity = totalQuantity;
+          localStorage.setItem('produit', JSON.stringify(purchaseStorage));
+          //affichage sous forme de tableau dans la console
+          console.table(purchaseStorage);
+          alertConfirmation();
+        } else {
+          //Sinon (produit different de ceux deja commandé)
+
+          purchaseStorage.push(info);
+          localStorage.setItem('produit', JSON.stringify(purchaseStorage));
+          //affichage sous forme de tableau dans la console
+          console.table(purchaseStorage);
+          alertConfirmation();
+        }
       } else {
-        //envoie l'utilisateur sur la page accueil
-        window.location.href = 'index.html';
+        //Sinon s'il n'y a rien dans le panier création array
+        purchaseStorage = [];
+        //On push les informations du localStorage dans le array
+        purchaseStorage.push(info);
+
+        localStorage.setItem('produit', JSON.stringify(purchaseStorage));
+        //affichage sous forme de tableau dans la console
+        console.table(purchaseStorage);
+        alertConfirmation();
       }
-    };
-
-    //fonction d'ajout de produit dans le panier pour
-    const addProduct = () => {
-      purchaseStorage.push(produitStorage);
-      localStorage.setItem('produit', JSON.stringify(purchaseStorage));
-    };
-
-    //s'il y a deja des produits d'enregistré dans le local storage
-    if (purchaseStorage) {
-      addProduct();
-      alertConfirmation();
-    }
-    //s'il n'y a pas de produit enregistré dans le local storage
-    else {
-      purchaseStorage = [];
-      addProduct();
-      alertConfirmation();
     }
   });
 }
