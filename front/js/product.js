@@ -80,8 +80,9 @@ function onClick(article) {
         idProduit: id,
         color: selectColor,
         quantity: Number(selectQuantity),
+        // AU webinaire deconseille de mettre les données genre prix donc comment les recuperer après
         nom: article.name,
-        prix: article.price,
+        // prix: article.price,
         description: article.description,
         imageUrl: article.imageUrl,
         imgAlt: article.altTxt,

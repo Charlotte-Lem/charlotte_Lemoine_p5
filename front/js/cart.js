@@ -1,9 +1,26 @@
 //PENSEZ A SUPP LES CONSOLE.LOG!!!!!!!!!!!!!!!!!!
 //on recupère le localStorage
 let purchaseStorage = JSON.parse(localStorage.getItem('produit'));
-
+let article = '';
 console.table(purchaseStorage);
 //Fonction pour la Création de l'article ou l'affichage du panier vide
+
+fetch('http://localhost:3000/api/products')
+  .then((res) => res.json())
+  .then((data) => {
+    if (purchaseStorage) {
+      for (p of purchaseStorage) {
+        const product = data.find((d) => d._id === p.idProduit);
+        if (product) {
+          p.price = product.price;
+        }
+      }
+    }
+    getItem();
+    modifyQuantity();
+
+    console.log(data);
+  });
 
 function getItem() {
   //Affichage si panier vide
@@ -13,12 +30,12 @@ function getItem() {
     emptyStorage.textContent = 'Votre panier est vide';
   } else {
     //si le panier n'est pas vide creation des cart article
-    for (let produit in purchaseStorage) {
+    for (let p in purchaseStorage) {
       let article = document.createElement('article');
       document.querySelector('#cart__items').appendChild(article);
       article.classList.add('cart__item');
-      article.setAttribute('data-id', purchaseStorage[produit].idProduit);
-      article.setAttribute('data-color', purchaseStorage[produit].color);
+      article.dataset.id = purchaseStorage[p].idProduit;
+      article.dataset.color = purchaseStorage[p].color;
 
       //creation de la div img
       let divImage = document.createElement('div');
@@ -28,8 +45,8 @@ function getItem() {
       //Insertion de l'image dans la div img
       let imageInDiv = document.createElement('img');
       divImage.appendChild(imageInDiv);
-      imageInDiv.src = purchaseStorage[produit].imageUrl;
-      imageInDiv.alt = purchaseStorage[produit].imgAlt;
+      imageInDiv.src = purchaseStorage[p].imageUrl;
+      imageInDiv.alt = purchaseStorage[p].imgAlt;
 
       //creation de la div cart__item__content
       let divContent = document.createElement('div');
@@ -44,18 +61,17 @@ function getItem() {
       //creation du h2 dans cart__item__content__description
       let divContentDescriptionH2 = document.createElement('h2');
       divContentDescription.appendChild(divContentDescriptionH2);
-      divContentDescriptionH2.textContent = purchaseStorage[produit].nom;
+      divContentDescriptionH2.textContent = purchaseStorage[p].nom;
 
       //creation du <p></p> pour la color
       let divContentDescriptionP = document.createElement('p');
       divContentDescription.appendChild(divContentDescriptionP);
-      divContentDescriptionP.textContent = purchaseStorage[produit].color;
+      divContentDescriptionP.textContent = purchaseStorage[p].color;
 
       //creation du <p></p> pour le prix
       let divContentDescriptionPrice = document.createElement('p');
       divContentDescription.appendChild(divContentDescriptionPrice);
-      divContentDescriptionPrice.textContent =
-        purchaseStorage[produit].prix + ' €';
+      divContentDescriptionPrice.textContent = purchaseStorage[p].price + ' €';
 
       //creation de la div cart__item__content__settings dans la div cart__item__content
       let divContentSettings = document.createElement('div');
@@ -71,20 +87,18 @@ function getItem() {
 
       //creation du p dans la div cart__item__content__settings__quantity
       let divContentSettingsQuantityP = document.createElement('p');
-      divContentDescription.appendChild(divContentSettingsQuantityP);
-      divContentSettingsQuantityP.textContent =
-        'Qté :' + purchaseStorage[produit].quantity;
+      divContentSettingsQuantity.appendChild(divContentSettingsQuantityP);
+      divContentSettingsQuantityP.textContent = 'Qté :';
 
       //création de <input>
-
-      let itemQuantity = document.createElement('input');
-      divContentSettings.appendChild(itemQuantity);
-      itemQuantity.setAttribute('type', 'number');
-      itemQuantity.classList.add('itemQuantity');
-      itemQuantity.setAttribute('name', 'itemQuantity');
-      itemQuantity.setAttribute('min', 1);
-      itemQuantity.setAttribute('max', 100);
-      itemQuantity.setAttribute('value', 1); // explication sur input et sa value
+      let inputQuantity = document.createElement('input');
+      divContentSettingsQuantity.appendChild(inputQuantity);
+      inputQuantity.setAttribute('type', 'number');
+      inputQuantity.classList.add('itemQuantity');
+      inputQuantity.setAttribute('name', 'itemQuantity');
+      inputQuantity.setAttribute('min', '1');
+      inputQuantity.setAttribute('max', '100');
+      inputQuantity.setAttribute('value', purchaseStorage[p].quantity); // A REVOIR
 
       //création de la div cart__item__content__settings__delete
       let itemDelete = document.createElement('div');
@@ -96,27 +110,91 @@ function getItem() {
       itemDeleteP.classList.add('deleteItem');
       itemDeleteP.textContent = 'Supprimer';
     }
+    totalItems();
+    modifyQuantity();
   }
 }
-getItem();
 
+//fonction pour quantité total et prix total des articles
+function totalItems() {
+  //Calcul de la quantité
+  let eltQuantity = document.getElementsByClassName('itemQuantity');
+  let quantityArray = eltQuantity.length;
+  totalQuantitySelect = 0;
+
+  for (let i = 0; i < quantityArray; i++) {
+    totalQuantitySelect += eltQuantity[i].valueAsNumber;
+  }
+  let totalQuantityItems = document.getElementById('totalQuantity');
+  totalQuantityItems.textContent = totalQuantitySelect;
+  console.log(totalQuantitySelect);
+
+  //calcul du Prix
+  totalPrice = 0;
+  for (let i = 0; i < quantityArray; i++) {
+    totalPrice += eltQuantity[i].valueAsNumber * purchaseStorage[i].price;
+  }
+  let productTotalPrice = document.getElementById('totalPrice');
+  productTotalPrice.textContent = totalPrice;
+  console.log(totalPrice);
+}
+
+//fonction de modification de la quantité des produits avec addEventListener change
+function modifyQuantity() {
+  const modifQuantity = document.querySelectorAll('.itemQuantity');
+
+  for (let i = 0; i < modifQuantity.length; i++) {
+    addEventListener('change', function (event) {
+      event.preventDefault();
+      purchaseStorage[i].quantity = event.target.value;
+      localStorage.setItem('produit', JSON.stringify(purchaseStorage));
+      totalItems();
+    });
+  }
+}
+
+//fonction pour delete un Item
+function deleteItem() {
+  const delArticle = document.querySelector('.deleteItem');
+  addEventListener('click', (e) => {
+    e.preventDefault();
+  });
+}
+//!!!!!!!!! element.closest + removeChild
+// for (let k = 0; k < delItem.length; k++) {
+//   delItem[k].
+//   addEventListener('click', (e) => {
+//     e.preventDefault();
+//     purchaseStorage.filter(
+//       (el) =>
+//         (el.id =
+//           purchaseStorage[k].idProduit ||
+//           el.color == purchaseStorage[k].color)
+//     );
+//     localStorage.setItem('produit', JSON.stringify(purchaseStorage));
+//     totalItems();
+//   });
+// }
+
+deleteItem();
+// //function message d'erreur pour input">
+// //(regex)
+// /* aide = document.querySelectorAll(".deleteItem").forEach(item => item.addEventListener("click", (e) => {*/
+
+// function eltForm() {}
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
--Concernant la modification, il va falloir recourir à l'événement de
-modification (addEventListener de type change) pour observer le
-changement de la quantité.
 -la méthode Element.closest() devrait permettre de cibler le
 produit que vous souhaitez supprimer (où dont vous souhaitez
 modifier la quantité) grâce à son identifiant et sa couleur
--!!!!!!Attention à bien penser à modifier le DOM, mais aussi localStorage,
-sinon les modifications effectuées dans le panier ne seront pas
-conservées en cas de changement de page / de rafraîchissement de
-la page.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
-//fonction pour quantité total et prix total des articles
-function totalItems() {}
-
-//fonction pour delete un Item
-function removeItem() {}
-
-//function message d'erreur pour input id id="firstNameErrorMsg">
+// let delItem = document.querySelectorAll('.deleteItem').forEach((delItem) =>
+// delItem.addEventListener('click', (e) => {
+//   console.log(e);
+//   if (produit.idProduit === produit.idProduit) {
+//   }
+//   // // localStorage.setItem('produit', JSON.stringify(purchaseStorage));
+//   // totalItems();
+// })
+// );
+// }
