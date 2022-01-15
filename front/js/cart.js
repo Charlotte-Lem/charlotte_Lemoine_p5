@@ -17,14 +17,15 @@ fetch('http://localhost:3000/api/products')
       }
     }
     getItem();
+    totalItems();
     modifyQuantity();
-
-    console.log(data);
+    deleteItem();
+    getForm();
   });
 
 function getItem() {
   //Affichage si panier vide
-  if (purchaseStorage === null) {
+  if (purchaseStorage === null || purchaseStorage.length === 0) {
     let emptyStorage = document.createElement('article');
     document.querySelector('#cart__items').appendChild(emptyStorage);
     emptyStorage.textContent = 'Votre panier est vide';
@@ -98,7 +99,7 @@ function getItem() {
       inputQuantity.setAttribute('name', 'itemQuantity');
       inputQuantity.setAttribute('min', '1');
       inputQuantity.setAttribute('max', '100');
-      inputQuantity.setAttribute('value', purchaseStorage[p].quantity); // A REVOIR
+      inputQuantity.value = purchaseStorage[p].quantity; // A REVOIR
 
       //création de la div cart__item__content__settings__delete
       let itemDelete = document.createElement('div');
@@ -110,8 +111,6 @@ function getItem() {
       itemDeleteP.classList.add('deleteItem');
       itemDeleteP.textContent = 'Supprimer';
     }
-    totalItems();
-    modifyQuantity();
   }
 }
 
@@ -119,10 +118,10 @@ function getItem() {
 function totalItems() {
   //Calcul de la quantité
   let eltQuantity = document.getElementsByClassName('itemQuantity');
-  let quantityArray = eltQuantity.length;
-  totalQuantitySelect = 0;
 
-  for (let i = 0; i < quantityArray; i++) {
+  let totalQuantitySelect = 0;
+
+  for (let i = 0; i < eltQuantity.length; i++) {
     totalQuantitySelect += eltQuantity[i].valueAsNumber;
   }
   let totalQuantityItems = document.getElementById('totalQuantity');
@@ -130,8 +129,8 @@ function totalItems() {
   console.log(totalQuantitySelect);
 
   //calcul du Prix
-  totalPrice = 0;
-  for (let i = 0; i < quantityArray; i++) {
+  let totalPrice = 0;
+  for (let i = 0; i < eltQuantity.length; i++) {
     totalPrice += eltQuantity[i].valueAsNumber * purchaseStorage[i].price;
   }
   let productTotalPrice = document.getElementById('totalPrice');
@@ -144,7 +143,7 @@ function modifyQuantity() {
   const modifQuantity = document.querySelectorAll('.itemQuantity');
 
   for (let i = 0; i < modifQuantity.length; i++) {
-    addEventListener('change', function (event) {
+    modifQuantity[i].addEventListener('change', function (event) {
       event.preventDefault();
       purchaseStorage[i].quantity = event.target.value;
       localStorage.setItem('produit', JSON.stringify(purchaseStorage));
@@ -155,46 +154,100 @@ function modifyQuantity() {
 
 //fonction pour delete un Item
 function deleteItem() {
-  const delArticle = document.querySelector('.deleteItem');
-  addEventListener('click', (e) => {
-    e.preventDefault();
+  const delItem = document.querySelectorAll('.deleteItem');
+  console.log(delItem);
+  for (let d = 0; d < delItem.length; d++) {
+    delItem[d].addEventListener('click', (e) => {
+      e.preventDefault();
+      //demande de confirmation de la suppression de l'article
+      if (
+        window.confirm(
+          `Êtes- vous sur de vouloir supprimer ${purchaseStorage[d].quantity} ${purchaseStorage[d].nom} de couleur ${purchaseStorage[d].color} ?`
+        )
+      ) {
+        let idDelItem = purchaseStorage[d].idProduit;
+        let colorDelItem = purchaseStorage[d].color;
+
+        purchaseStorage = purchaseStorage.filter(
+          (element) =>
+            element.idProduit !== idDelItem || element.color !== colorDelItem
+        );
+        localStorage.setItem('produit', JSON.stringify(purchaseStorage));
+        location.reload();
+      }
+    });
+  }
+}
+
+/*************************************FORMULAIRE**********************************************/
+//function pour different element du formulaire
+function getForm() {
+  //regex
+  let nameRegex = new RegExp("^[a-zA-Zàâäéèêëïîôöùûüç ,.'-]+$");
+  let emailRegex = new RegExp(
+    '^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,10}$'
+  );
+  let adressRegex = new RegExp(
+    '^[0-9]{1,3}(?:(?:[,. ]){1}[-a-zA-Zàâäéèêëïîôöùûüç]+)+'
+  );
+
+  //évenement sur le champs prénom et validation du format
+  let firstName = document.getElementById('firstName');
+  firstName.addEventListener('input', function () {
+    if (nameRegex.test(firstName.value) === false) {
+      document.getElementById('firstNameErrorMsg').textContent =
+        'Format du prénom incorrect';
+    } else {
+      document.getElementById('firstNameErrorMsg').textContent = '';
+    }
+  });
+
+  //évenement sur le champs nom et validation du format
+  let lastName = document.getElementById('lastName');
+  lastName.addEventListener('input', function () {
+    if (nameRegex.test(lastName.value) === false) {
+      document.getElementById('lastNameErrorMsg').textContent =
+        'Format du nom incorrect';
+    } else {
+      document.getElementById('lastNameErrorMsg').textContent = '';
+    }
+  });
+
+  //évenement sur le champs adresse et validation du format
+  let address = document.getElementById('address');
+  address.addEventListener('input', function () {
+    if (adressRegex.test(address.value) === false) {
+      document.getElementById('addressErrorMsg').textContent =
+        "Format du l'adresse incorrect";
+    } else {
+      document.getElementById('addressErrorMsg').textContent = '';
+    }
+  });
+
+  //évenement sur le champs ville et validation du format
+  let city = document.getElementById('city');
+  city.addEventListener('input', function () {
+    if (nameRegex.test(city.value) === false) {
+      document.getElementById('cityErrorMsg').textContent =
+        'Format de la ville incorrecte';
+    } else {
+      document.getElementById('cityErrorMsg').textContent = '';
+    }
+  });
+
+  //évenement sur le champs email et validation du format
+  let email = document.getElementById('email');
+  email.addEventListener('input', function () {
+    if (emailRegex.test(email.value) === false) {
+      document.getElementById('emailErrorMsg').textContent =
+        "Format de l'email incorrect";
+    } else {
+      document.getElementById('emailErrorMsg').textContent = '';
+    }
   });
 }
-//!!!!!!!!! element.closest + removeChild
-// for (let k = 0; k < delItem.length; k++) {
-//   delItem[k].
-//   addEventListener('click', (e) => {
-//     e.preventDefault();
-//     purchaseStorage.filter(
-//       (el) =>
-//         (el.id =
-//           purchaseStorage[k].idProduit ||
-//           el.color == purchaseStorage[k].color)
-//     );
-//     localStorage.setItem('produit', JSON.stringify(purchaseStorage));
-//     totalItems();
-//   });
-// }
 
-deleteItem();
-// //function message d'erreur pour input">
-// //(regex)
-// /* aide = document.querySelectorAll(".deleteItem").forEach(item => item.addEventListener("click", (e) => {*/
-
-// function eltForm() {}
-/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
--la méthode Element.closest() devrait permettre de cibler le
-produit que vous souhaitez supprimer (où dont vous souhaitez
-modifier la quantité) grâce à son identifiant et sa couleur
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
-
-// let delItem = document.querySelectorAll('.deleteItem').forEach((delItem) =>
-// delItem.addEventListener('click', (e) => {
-//   console.log(e);
-//   if (produit.idProduit === produit.idProduit) {
-//   }
-//   // // localStorage.setItem('produit', JSON.stringify(purchaseStorage));
-//   // totalItems();
-// })
-// );
-// }
+function OrderForm() {
+  let order = document.querySelector('#order');
+  console.log(order);
+}

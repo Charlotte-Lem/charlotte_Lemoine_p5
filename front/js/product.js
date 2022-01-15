@@ -80,9 +80,7 @@ function onClick(article) {
         idProduit: id,
         color: selectColor,
         quantity: Number(selectQuantity),
-        // AU webinaire deconseille de mettre les données genre prix donc comment les recuperer après
         nom: article.name,
-        // prix: article.price,
         description: article.description,
         imageUrl: article.imageUrl,
         imgAlt: article.altTxt,
@@ -97,11 +95,14 @@ function onClick(article) {
       const alertConfirmation = () => {
         if (
           window.confirm(
-            `${selectQuantity} ${article.name} de couleur ${selectColor} a bien été ajouté à votre panier pour consulter votre panier appuyer sur OK sinon ANNULER pour rester sur la page`
+            `${selectQuantity} ${article.name} de couleur ${selectColor} a bien été ajouté à votre panier
+             pour consulter votre panier appuyer sur OK sinon ANNULER pour rester sur la page`
           )
         ) {
           //envoie l'utilisateur sur la page panier
           window.location.href = 'cart.html';
+        } else {
+          location.reload(); //reload de la page actuelle
         }
       };
 
@@ -111,17 +112,10 @@ function onClick(article) {
         );
         if (foundStorage) {
           //Si dans le panier il y a un produit avec le même id et la même couleur
-
-          // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!A REVOIR CAR PAS A L AISE ICI !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-          // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!A REVOIR CAR PAS A L AISE ICI !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-          // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!A REVOIR CAR PAS A L AISE ICI !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
           let totalQuantity =
             parseInt(info.quantity) + parseInt(foundStorage.quantity);
           foundStorage.quantity = totalQuantity;
           localStorage.setItem('produit', JSON.stringify(purchaseStorage));
-          //affichage sous forme de tableau dans la console
-          console.table(purchaseStorage);
           alertConfirmation();
         } else {
           //Sinon (produit different de ceux deja commandé)
