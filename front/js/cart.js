@@ -1,10 +1,17 @@
-//PENSEZ A SUPP LES CONSOLE.LOG!!!!!!!!!!!!!!!!!!
 //on recupère le localStorage
 let purchaseStorage = JSON.parse(localStorage.getItem('produit'));
 let article = '';
-console.table(purchaseStorage);
-//Fonction pour la Création de l'article ou l'affichage du panier vide
 
+//regex
+let nameRegex = new RegExp("^[a-zA-Zàâäéèêëïîôöùûüç ,.'-]+$");
+let emailRegex = new RegExp(
+  '^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,10}$'
+);
+let adressRegex = new RegExp(
+  '^[0-9]{1,3}(?:(?:[,. ]){1}[-a-zA-Zàâäéèêëïîôöùûüç]+)+'
+);
+
+// on fetch pour récupèrer le prix dans l'api
 fetch('http://localhost:3000/api/products')
   .then((res) => res.json())
   .then((data) => {
@@ -21,8 +28,10 @@ fetch('http://localhost:3000/api/products')
     modifyQuantity();
     deleteItem();
     getForm();
+    orderForm();
   });
 
+//Fonction pour la Création de l'article ou l'affichage du panier vide
 function getItem() {
   //Affichage si panier vide
   if (purchaseStorage === null || purchaseStorage.length === 0) {
@@ -126,7 +135,6 @@ function totalItems() {
   }
   let totalQuantityItems = document.getElementById('totalQuantity');
   totalQuantityItems.textContent = totalQuantitySelect;
-  console.log(totalQuantitySelect);
 
   //calcul du Prix
   let totalPrice = 0;
@@ -135,7 +143,6 @@ function totalItems() {
   }
   let productTotalPrice = document.getElementById('totalPrice');
   productTotalPrice.textContent = totalPrice;
-  console.log(totalPrice);
 }
 
 //fonction de modification de la quantité des produits avec addEventListener change
@@ -155,7 +162,6 @@ function modifyQuantity() {
 //fonction pour delete un Item
 function deleteItem() {
   const delItem = document.querySelectorAll('.deleteItem');
-  console.log(delItem);
   for (let d = 0; d < delItem.length; d++) {
     delItem[d].addEventListener('click', (e) => {
       e.preventDefault();
@@ -182,15 +188,6 @@ function deleteItem() {
 /*************************************FORMULAIRE**********************************************/
 //function pour different element du formulaire
 function getForm() {
-  //regex
-  let nameRegex = new RegExp("^[a-zA-Zàâäéèêëïîôöùûüç ,.'-]+$");
-  let emailRegex = new RegExp(
-    '^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,10}$'
-  );
-  let adressRegex = new RegExp(
-    '^[0-9]{1,3}(?:(?:[,. ]){1}[-a-zA-Zàâäéèêëïîôöùûüç]+)+'
-  );
-
   //évenement sur le champs prénom et validation du format
   let firstName = document.getElementById('firstName');
   firstName.addEventListener('input', function () {
@@ -218,7 +215,7 @@ function getForm() {
   address.addEventListener('input', function () {
     if (adressRegex.test(address.value) === false) {
       document.getElementById('addressErrorMsg').textContent =
-        "Format du l'adresse incorrect";
+        "Format de l'adresse incorrect";
     } else {
       document.getElementById('addressErrorMsg').textContent = '';
     }
@@ -247,7 +244,67 @@ function getForm() {
   });
 }
 
-function OrderForm() {
-  let order = document.querySelector('#order');
-  console.log(order);
+//Function btn order commander pour confirmation de la commande
+function orderForm() {
+  const orderButton = document.getElementById('order');
+  orderButton.addEventListener('click', (e) => {
+    e.preventDefault();
+    //si local storage vide et /ou formulaire non remplis correctement après test ReGex
+    if (
+      !nameRegex.test(firstName.value) ||
+      !nameRegex.test(lastName.value) ||
+      !emailRegex.test(email.value) ||
+      !nameRegex.test(city.value) ||
+      !adressRegex.test(address.value) ||
+      purchaseStorage == 0
+    ) {
+      window.alert(
+        'Veuillez mettre un article dans votre panier et remplir entièrement le formulaire'
+      );
+    } else {
+      /* si produit dans local storage et formulaire correct*/
+      //création d'un tableau pour recuperer les ID produits
+      let productId = [];
+      for (let i = 0; i < purchaseStorage.length; i++) {
+        productId.push(purchaseStorage[i].idProduit);
+      }
+
+      //creation  de l'objet contact avec les infos remplis dans le formulaire et insertion du tableau productId
+      let buyOrder = {
+        contact: {
+          firstName: firstName.value,
+          lastName: lastName.value,
+          address: address.value,
+          city: city.value,
+          email: email.value,
+        },
+        products: productId,
+      };
+      //option de la method post fetch
+      const postOptions = {
+        method: 'POST',
+        body: JSON.stringify(buyOrder),
+        headers: {
+          Accept: 'application/json',
+          'Content-type': 'application/json',
+        },
+      };
+      //Appel de l'API pour post les informations order
+      fetch('http://localhost:3000/api/products/order', postOptions)
+        .then((res) => {
+          return res.json();
+        })
+        .then((data) => {
+          console.log(data);
+          //envoie vers la page de de confirmation
+          // window.location.href = 'confirmation.html';
+          //vider le local storage la ???
+        })
+        .catch((error) => {
+          alert(error);
+        });
+    }
+  });
 }
+
+//On en recupère pas la quantité? et les id color? la quantité et la couleur ne s'affiche pas dans le buyOrder

@@ -1,4 +1,3 @@
-//PENSEZ A SUPP LES CONSOLE.LOG!!!!!!!!!!!!!!!!!!
 
 //On récupere l'id du produit en question dans l'url
 const queryString = window.location.search;
@@ -20,7 +19,6 @@ fetch(`http://localhost:3000/api/products/${id}`)
     return getArticle(res);
   })
   .catch((error) => console.log(error));
-// .catch((error) => console.error(error)); ??????????
 
 //Création article des produits
 function getArticle(article) {
@@ -122,19 +120,14 @@ function onClick(article) {
 
           purchaseStorage.push(info);
           localStorage.setItem('produit', JSON.stringify(purchaseStorage));
-          //affichage sous forme de tableau dans la console
-          console.table(purchaseStorage);
           alertConfirmation();
         }
       } else {
-        //Sinon s'il n'y a rien dans le panier création array
+        //s'il n'y a rien dans le panier création array
         purchaseStorage = [];
         //On push les informations du localStorage dans le array
         purchaseStorage.push(info);
-
         localStorage.setItem('produit', JSON.stringify(purchaseStorage));
-        //affichage sous forme de tableau dans la console
-        console.table(purchaseStorage);
         alertConfirmation();
       }
     }
