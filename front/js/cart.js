@@ -295,10 +295,9 @@ function orderForm() {
           return res.json();
         })
         .then((data) => {
-          console.log(data);
+          const orderId = data.orderId;
           //envoie vers la page de de confirmation
-          // window.location.href = 'confirmation.html';
-          //vider le local storage la ???
+          window.location.href = "confirmation.html" + "?orderId=" + orderId;
         })
         .catch((error) => {
           alert(error);
