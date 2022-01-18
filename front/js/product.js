@@ -1,4 +1,3 @@
-
 //On récupere l'id du produit en question dans l'url
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
@@ -93,8 +92,7 @@ function onClick(article) {
       const alertConfirmation = () => {
         if (
           window.confirm(
-            `${selectQuantity} ${article.name} de couleur ${selectColor} a bien été ajouté à votre panier
-             pour consulter votre panier appuyer sur OK sinon ANNULER pour rester sur la page`
+            `${selectQuantity} ${article.name} de couleur ${selectColor} bien ajouté à votre panier pour le consulter appuyer sur OK `
           )
         ) {
           //envoie l'utilisateur sur la page panier

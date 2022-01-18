@@ -1,64 +1,32 @@
-
 //Appel de l'API des produits
 fetch('http://localhost:3000/api/products')
   .then((response) => response.json())
   .then((data) => addProducts(data))
   .catch((error) => console.log(error));
 
+//création des article des produits
 function addProducts(data) {
   for (let i = 0; i < data.length; i++) {
-    const { _id, imageUrl, altTxt, name, description } = data[i];
+    let anchor = document.createElement('a');
+    document.querySelector('#items').appendChild(anchor);
+    anchor.href = `./product.html?id=${data[i]._id}`;
 
-    const anchor = makeAnchor(_id);
+    let article = document.createElement('article');
+    anchor.appendChild(article);
 
-    const image = inserImage(imageUrl, altTxt);
-    const article = document.createElement('article');
-    const h3 = inserH3(name);
-    const p = inserParagraph(description);
+    let image = document.createElement('img');
+    article.appendChild(image);
+    image.src = data[i].imageUrl;
+    image.Alt = data[i].altTxt;
 
-    appendElmtsArticle(article, image, h3, p);
-    appendArticleToAnchor(anchor, article);
+    let h3 = document.createElement('h3');
+    article.appendChild(h3);
+    h3.classList.add('productName');
+    h3.textContent = data[i].name;
+
+    let p = document.createElement('p');
+    article.appendChild(p);
+    p.classList.add('productDescription');
+    p.textContent = data[i].description;
   }
-}
-// append elements dans le lien
-function appendElmtsArticle(article, image, h3, p) {
-  article.appendChild(image);
-  article.appendChild(h3);
-  article.appendChild(p);
-}
-
-// lien
-function makeAnchor(id) {
-  const anchor = document.createElement('a');
-  anchor.href = './product.html?id=' + id;
-  return anchor;
-}
-
-//
-function appendArticleToAnchor(anchor, article) {
-  const items = document.getElementById('items');
-  items.appendChild(anchor);
-  anchor.appendChild(article);
-}
-
-//Création de l'image
-function inserImage(imageUrl, altTxt) {
-  const image = document.createElement('img');
-  image.src = imageUrl;
-  image.Alt = altTxt;
-  return image;
-}
-//Création du H3 et ajout de la classe
-function inserH3(name) {
-  const h3 = document.createElement('h3');
-  h3.textContent = name;
-  h3.classList.add('productName');
-  return h3;
-}
-//Création du paragraphe pour la description et ajout de la classe
-function inserParagraph(description) {
-  const p = document.createElement('p');
-  p.textContent = description;
-  p.classList.add('productDescription');
-  return p;
 }
