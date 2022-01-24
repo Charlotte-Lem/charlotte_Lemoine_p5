@@ -1,11 +1,11 @@
 //Appel de l'API des produits
 fetch('http://localhost:3000/api/products')
   .then((response) => response.json())
-  .then((data) => addProducts(data))
-  .catch((error) => console.log(error));
+  .then((data) => getProducts(data))
+  .catch((error) => console.error(error));
 
-//création des article des produits
-function addProducts(data) {
+//création des articles des produits
+function getProducts(data) {
   for (let i = 0; i < data.length; i++) {
     let anchor = document.createElement('a');
     document.querySelector('#items').appendChild(anchor);

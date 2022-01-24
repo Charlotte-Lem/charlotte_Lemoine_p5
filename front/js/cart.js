@@ -29,7 +29,8 @@ fetch('http://localhost:3000/api/products')
     deleteItem();
     getForm();
     orderForm();
-  });
+  })
+  .catch((error) => console.error(error));
 
 //Fonction pour la Création de l'article ou l'affichage du panier vide
 function getItem() {
@@ -152,6 +153,7 @@ function modifyQuantity() {
   for (let i = 0; i < modifQuantity.length; i++) {
     modifQuantity[i].addEventListener('change', function (event) {
       event.preventDefault();
+
       purchaseStorage[i].quantity = event.target.value;
       localStorage.setItem('produit', JSON.stringify(purchaseStorage));
       totalItems();
@@ -247,20 +249,25 @@ function getForm() {
 //Function btn order commander pour confirmation de la commande
 function orderForm() {
   const orderButton = document.getElementById('order');
+  const inputQuantity = document.querySelector('.itemQuantity');
   orderButton.addEventListener('click', (e) => {
     e.preventDefault();
-    //si local storage vide et /ou formulaire non remplis correctement après test ReGex
-    if (
+    if (inputQuantity.value < 1 || inputQuantity.value > 100) {
+      alert('Veuillez sélectionner une quantité comprise entre 1 et 100 svp ');
+    } else if (purchaseStorage === 0) {
+      alert(
+        'Votre panier est vide, veuillez sélectionner un article pour passer une commande'
+      );
+    }
+    //si le formulaire non remplis correctement après test ReGex
+    else if (
       !nameRegex.test(firstName.value) ||
       !nameRegex.test(lastName.value) ||
       !emailRegex.test(email.value) ||
       !nameRegex.test(city.value) ||
-      !adressRegex.test(address.value) ||
-      purchaseStorage == 0
+      !adressRegex.test(address.value)
     ) {
-      window.alert(
-        'Veuillez mettre un article dans votre panier et remplir entièrement le formulaire'
-      );
+      alert('Veuillez remplir correctement tous les champs du formulaire');
     } else {
       /* si produit dans local storage et formulaire correct*/
       //création d'un tableau pour recuperer les ID produits
@@ -280,6 +287,7 @@ function orderForm() {
         },
         products: productId,
       };
+      console.log(buyOrder);
       //option de la method post fetch
       const postOptions = {
         method: 'POST',
@@ -297,7 +305,7 @@ function orderForm() {
         .then((data) => {
           const orderId = data.orderId;
           //envoie vers la page de de confirmation
-          window.location.href = "confirmation.html" + "?orderId=" + orderId;
+          window.location.href = 'confirmation.html' + '?orderId=' + orderId;
         })
         .catch((error) => {
           alert(error);
