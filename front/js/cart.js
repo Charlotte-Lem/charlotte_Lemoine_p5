@@ -262,11 +262,11 @@ function orderForm() {
   orderButton.addEventListener('click', (e) => {
     e.preventDefault();
 
-    if (purchaseStorage === 0) {
+    if (!purchaseStorage) {
       alert(
         'Votre panier est vide, veuillez sélectionner un article pour passer une commande'
       );
-      console.log(typeof inputQuantity.value);
+      
     }
     //si le formulaire non remplis correctement après test ReGex  ---> message
     else if (
