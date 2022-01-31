@@ -2,7 +2,7 @@
 let purchaseStorage = JSON.parse(localStorage.getItem('produit'));
 let article = '';
 
-//regex
+//RegEx
 let nameRegex = new RegExp("^[a-zA-Zàâäéèêëïîôöùûüç ,.'-]+$");
 let emailRegex = new RegExp(
   '^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,10}$'
@@ -155,8 +155,17 @@ function modifyQuantity() {
       event.preventDefault();
 
       purchaseStorage[i].quantity = event.target.value;
-      localStorage.setItem('produit', JSON.stringify(purchaseStorage));
-      totalItems();
+
+      if (
+        purchaseStorage[i].quantity == 0 ||
+        purchaseStorage[i].quantity > 100
+      ) {
+        alert('Veuillez sélectionner une quantité comprise entre 1 et 100');
+        location.reload();
+      } else {
+        localStorage.setItem('produit', JSON.stringify(purchaseStorage));
+        totalItems();
+      }
     });
   }
 }
@@ -249,17 +258,17 @@ function getForm() {
 //Function btn order commander pour confirmation de la commande
 function orderForm() {
   const orderButton = document.getElementById('order');
-  const inputQuantity = document.querySelector('.itemQuantity');
+
   orderButton.addEventListener('click', (e) => {
     e.preventDefault();
-    if (inputQuantity.value < 1 || inputQuantity.value > 100) {
-      alert('Veuillez sélectionner une quantité comprise entre 1 et 100 svp ');
-    } else if (purchaseStorage === 0) {
+
+    if (purchaseStorage === 0) {
       alert(
         'Votre panier est vide, veuillez sélectionner un article pour passer une commande'
       );
+      console.log(typeof inputQuantity.value);
     }
-    //si le formulaire non remplis correctement après test ReGex
+    //si le formulaire non remplis correctement après test ReGex  ---> message
     else if (
       !nameRegex.test(firstName.value) ||
       !nameRegex.test(lastName.value) ||
@@ -313,5 +322,3 @@ function orderForm() {
     }
   });
 }
-
-//On en recupère pas la quantité? et les id color? la quantité et la couleur ne s'affiche pas dans le buyOrder
